@@ -1,0 +1,6 @@
+- name: Ensure that the user 'sanyi' exists and has zsh.
+  user:
+    name: sanyi
+    shell: /bin/zsh
+        
+      

@@ -1,0 +1,22 @@
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+- name: Install nfs server packages.
+  apt: name={{item}} state=installed
+  with_items:
+    - nfs-kernel-server
+    - rpcbind
+    - nfs-common
+- name: Share home directory.
+  lineinfile:
+    dest: /etc/exports
+    regexp: '^/home'
+    line: '/home	192.168.1.0/24(rw,sync,no_subtree_check)'
+- name: Start RPCBind if not started.
+  service:
+    name: rpcbind
+    state: started
+- name: Restart NFS kernel server.
+  service:
+    name: nfs-kernel-server
+    state: restarted
+        

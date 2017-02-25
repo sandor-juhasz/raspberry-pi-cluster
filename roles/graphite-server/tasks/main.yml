@@ -1,0 +1,27 @@
+---
+- name: Install graphite pacakges.
+  apt: name={{item}} update-cache=yes cache_valid_time=3600
+  with_items:
+    - graphite-carbon
+    - graphite-web
+- name: Updates the graphite web config.
+  copy:
+    src: local_settings.py
+    dest: /etc/graphite/local_settings.py
+    owner: root
+    group: root
+    mode: 0644
+- name: Copy initd script.
+  copy:
+    src: graphite-web
+    dest: /etc/init.d/graphite-web
+    owner: root
+    group: root
+    mode: 0755
+- name: Add init script symlinks
+  command: update-rc.d graphite-web defaults      
+- name: Start server
+  command: /etc/init.d/graphite-web restart
+      
+  
+  

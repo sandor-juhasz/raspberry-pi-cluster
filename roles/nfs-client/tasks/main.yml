@@ -1,0 +1,14 @@
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+- name: Install nfs client packages.
+  apt: name={{item}} state=installed
+  with_items:
+    - rpcbind
+    - nfs-common
+- name: Mount remote filesystem
+  mount:
+    src: 192.168.1.11:/home
+    name: /home
+    state: mounted
+    fstype: nfs
+    opts: auto,noatime,nolock,intr,tcp,timeo=60

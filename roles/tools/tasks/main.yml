@@ -1,0 +1,13 @@
+---
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+- name: Install standard Linux command line tools
+  apt: name={{item}} state=installed
+  with_items:
+    - mc
+    - tmux
+    - zsh
+    - screenfetch
+    - chkconfig
+    - htop
+    - emacs

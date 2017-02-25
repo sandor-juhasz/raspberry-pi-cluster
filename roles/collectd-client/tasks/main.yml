@@ -1,0 +1,16 @@
+---
+- name: Installs collectd.
+  apt: name={{item}} update-cache=yes cache_valid_time=3600
+  with_items:
+    - collectd
+- name: Updates collectd.conf to log to Graphite Carbon.
+  copy:
+    src: collectd.conf
+    dest: /etc/collectd/collectd.conf
+    owner: root
+    group: root
+    mode: 0644
+- name: Restarts collectd
+  service:
+    name: collectd
+    state: restarted

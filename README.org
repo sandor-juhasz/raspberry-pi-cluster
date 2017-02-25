@@ -1,0 +1,5 @@
+#+title: Raspberry PI Cluster
+
+This project contains all the configuration settings I used to play
+with my 4-node Raspberry Pi cluster. I used Ansible to configure the
+nodes.

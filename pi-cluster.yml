@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - tools
+    - default-users
+    - collectd-client
+- hosts: pi1
+  become: true
+  roles:
+    - nfs-server
+    - graphite-server
+- hosts: pi2,pi3,pi4
+  become: true
+  roles:
+    - nfs-client

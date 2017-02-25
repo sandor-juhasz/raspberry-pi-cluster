@@ -1,0 +1,33 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:             graphite-web
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:
+# Short-Description:    Django-based Graphite web interface on port 8080
+### END INIT INFO
+
+case "$1" in
+  start)
+      echo "Starting graphite-web"
+      /bin/bash -c '/usr/bin/django-admin runserver --settings graphite.settings 0.0.0:8080' _graphite &
+      ;;
+  stop)
+      echo -n "Shutting down graphite-web"
+      for i in `ps -aux | grep 'graphite.settings' | awk '{print $2}'`
+      do
+          echo "Process id: $i"
+	  kill $i
+      done
+      ;;
+  restart)
+      $0 stop
+      $0 start
+      ;;
+  *)
+      echo "Usage: $0 {start|stop}"
+      exit 1
+esac
+exit 0
