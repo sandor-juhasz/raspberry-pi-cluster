@@ -1,0 +1,18 @@
+---
+- hosts: pi2,pi3,pi4
+  become: true
+  tasks:
+    - name: Shuts down the Pi workers.
+      command: /sbin/shutdown -h +1
+      async: 0
+      poll: 0
+      ignore_errors: true
+- hosts: pi1
+  become: true
+  tasks:
+    - name: Shuts down the NFS server.
+      command: /sbin/shutdown -h +2
+      async: 0
+      poll: 0
+      ignore_errors: true
+      
