@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Updates APT cache
+      apt: update-cache=yes cache_valid_time=3600
+    - name: Upgrade the system.
+      apt: upgrade=yes
+      
