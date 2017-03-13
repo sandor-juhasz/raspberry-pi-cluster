@@ -1,0 +1,14 @@
+#!/bin/bash
+###########################################################################
+#
+# Shell script used to shut down the Pi cluster.
+#
+###########################################################################
+
+if [ -z "$PI_CLUSTER_HOME" ]; then
+    echo "Please set PI_CLUSTER_HOME."
+    exit 1
+fi
+
+cd $PI_CLUSTER_HOME
+ansible-playbook "tasks/shutdown.yml"

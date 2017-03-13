@@ -1,0 +1,38 @@
+#!/bin/bash
+###########################################################################
+#
+# Text-based administration interface for the Raspberry Pi Cluster.
+#
+# Created by Sándor Juhász, 2017.
+#
+###########################################################################
+
+shutdown-cmd () {
+    whiptail --title "Shutdown" \
+	     --yesno \
+	     --defaultno \
+	     "Are you sure you want to shut down the cluster?" \
+	     8 60
+    if [ $? -eq 0 ]; then
+	cl-shutdown
+    fi
+}
+
+status=0
+while [ ${status} -eq 0 ]; do
+    choice=`whiptail --title "Raspberry Pi Cluster Administration" \
+  	             --menu "Choose an option" 15 60 5 \
+  	             "Provision" "(Re)provisions the whole pi cluster." \
+	             "Shutdown" "Shuts down the cluster in an orderly manner." \
+	             "Quit" ""  3>&2 2>&1 1>&3`
+    option=$(echo $choice | tr '[:upper:]' '[:lower:]' | sed 's/ //g')
+    case "${option}" in
+	quit)
+	   status=1
+	   exit
+	   ;;
+        shutdown)
+	  shutdown-cmd
+	  ;;		  
+    esac
+done
