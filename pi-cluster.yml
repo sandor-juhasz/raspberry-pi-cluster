@@ -7,6 +7,7 @@
     - name: "user_password"
       prompt: "Password of the default user"
   roles:
+    - raspbian
     - tools
     - default-users
     - collectd-client
