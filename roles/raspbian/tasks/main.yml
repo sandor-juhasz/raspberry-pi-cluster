@@ -10,3 +10,9 @@
     dest: /etc/apt/sources.list
     regexp: '^deb http://raspbian.innobrand.hu'
     line: 'deb http://raspbian.innobrand.hu/raspbian/ jessie main contrib non-free rpi'
+
+- name: Update APT cache
+  apt: update-cache=yes cache_valid_time=3600
+
+- name: Upgrade the system
+  apt: upgrade=yes
