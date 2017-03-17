@@ -6,6 +6,30 @@
     - nfs-kernel-server
     - rpcbind
     - nfs-common
+    
+- name: Remove sysinit links for rpcbind
+  shell: find /etc/rc*.d -name '*rpcbind*' -exec rm -rf {} \;
+- name: Remove sysinit links for nfs common
+  shell: find /etc/rc*.d -name '*nfs-common*' -exec rm -rf {} \;
+- name: Remove sysinit links for nfs-kernel-server
+  shell: find /etc/rc*.d -name '*nfs-kernel-server*' -exec rm -rf {} \;
+- name: Update /etc/init.d/rpcbind
+  lineinfile:
+    dest: /etc/init.d/rpcbind
+    regexp: '^# Default-Start:'
+    line: '# Default-Start:     2 3 4 5'
+- name: Update /etc/init.d/nfs-common
+  lineinfile:
+    dest: /etc/init.d/rpcbind
+    regexp: '^# Default-Start:'
+    line: '# Default-Start:     2 3 4 5'    
+- name: Enable rpcbind
+  shell: update-rc.d rpcbind defaults
+- name: Enable nfs-common
+  shell: update-rc.d nfs-common defaults
+- name: Enable nfs-kernel-server
+  shell: update-rc.d nfs-kernel-server defaults
+
 - name: Share home directory.
   lineinfile:
     dest: /etc/exports
