@@ -4,6 +4,7 @@
 - name: Install standard Linux command line tools
   apt: name={{item}} state=installed
   with_items:
+    - curl
     - mc
     - tmux
     - zsh

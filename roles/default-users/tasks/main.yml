@@ -1,6 +1,18 @@
-- name: Ensure that the user 'sanyi' exists and has zsh.
+- name: Encrypt user password.
+  shell: echo "{{ user_password|quote }}" | mkpasswd -s --method=sha-512
+  register: encoded_pwd
+    
+- name: Create the default user and set zsh as default shell.
   user:
-    name: sanyi
+    name: "{{ user_name }}"
     shell: /bin/zsh
-        
+    password: "{{encoded_pwd.stdout}}"
+
+- name: Add default user to sudoers.
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^{{ user_name }}'
+    line: '{{ user_name }} ALL=(ALL:ALL) ALL'
+       
       

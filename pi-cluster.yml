@@ -1,6 +1,11 @@
 ---
 - hosts: all
   become: true
+  vars_prompt:
+    - name: "user_name"
+      prompt: "Name of the default user"
+    - name: "user_password"
+      prompt: "Password of the default user"
   roles:
     - tools
     - default-users
