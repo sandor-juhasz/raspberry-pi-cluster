@@ -1,0 +1,28 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:             noip2
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:
+# Short-Description:    no-ip.com dynamic DNS registration agent
+### END INIT INFO
+
+case "$1" in
+  start)
+      echo "Starting noip2."
+      /usr/local/bin/noip2
+      ;;
+ stop)
+     echo -n "Shutting down noip2."
+     for i in `noip2 -S 2>&1 | grep Process | awk '{print $2}' | tr -d ','`
+     do
+        noip2 -K $i
+     done
+     ;;
+ *)
+     echo "Usage: $0 {start|stop}"
+     exit 1
+esac
+exit 0

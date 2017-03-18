@@ -1,0 +1,62 @@
+- name: Download the no-ip DUC
+  get_url:
+    url: http://www.noip.com/client/linux/noip-duc-linux.tar.gz
+    dest: /usr/local/src
+
+- name: Extract the no-ip DUC
+  unarchive:
+    src: /usr/local/src/noip-duc-linux.tar.gz
+    dest: /usr/local/src
+
+- name: Build the DUC
+  shell: make
+  args:
+    chdir: /usr/local/src/noip-2.1.9-1
+
+- name: Create bin directory if it does not exist
+  file:
+    path: /usr/local/bin
+    state: directory
+    mode: 0755
+
+- name: Create etc directory if it does not exist
+  file:
+    path: /usr/local/etc
+    state: directory
+    mode: 0755
+
+- name: Install noip2 binary
+  shell: cp /usr/local/src/noip-2.1.9-1/noip2 /usr/local/bin/noip2
+
+- name: Change permission of the noip2 binary
+  file:
+    path: /usr/local/bin/noip2
+    mode: 0700
+
+- name: Create configuration file
+  shell: noip2 -C -c /tmp/no-ip2.conf -I eth0 -u {{ noip_username }} -p {{ noip_password }} -U 30
+
+- name: Move configuration file to its destination.
+  shell: mv /tmp/no-ip2.conf /usr/local/etc
+
+- name: Change permission of the config file.
+  file:
+    path: /usr/local/etc/no-ip2.conf
+    owner: nobody
+
+- name: Install noip init script
+  copy:
+    src: noip2
+    dest: /etc/init.d/noip2
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install service to all runlevels
+  shell: update-rc.d noip2 defaults
+
+- name: Start noip2 service
+  service:
+    name: noip2
+    state: started
+    
