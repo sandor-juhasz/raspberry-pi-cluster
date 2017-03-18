@@ -1,0 +1,5 @@
+- name: Install fail2ban package.
+  apt: name={{item}} update-cache=yes cache_valid_time=3600
+  with_items:
+    - fail2ban
+      
