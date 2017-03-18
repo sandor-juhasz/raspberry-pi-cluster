@@ -11,6 +11,19 @@
     owner: root
     group: root
     mode: 0644
+- name: Initialize the django db. Interactive, create admin / admin user.
+  expect:
+    command: graphite-manage syncdb
+    responses:
+      'Would you like to create one now?.*': 'yes'
+      'Username.*': 'admin'
+      'Email address:.*': 'a@a.hu'
+      'Password.*': 'admin'
+- name: Update ownership of the graphite db
+  file:
+    path: /var/lib/graphite/graphite.db
+    owner: _graphite
+    group: _graphite
 - name: Copy initd script.
   copy:
     src: graphite-web
