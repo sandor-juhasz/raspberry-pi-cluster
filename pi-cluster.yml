@@ -11,6 +11,7 @@
     - tools
     - default-users
     - collectd-client
+    - docker
 - hosts: pi1
   become: true
   roles:

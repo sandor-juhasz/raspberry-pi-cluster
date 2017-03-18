@@ -1,0 +1,12 @@
+- name: Check if docker is installed
+  stat: path=/usr/bin/docker
+  register: docker_binary
+
+- name: Install docker if it cannot be found.
+  shell: curl -sSL https://get.docker.com | sh
+  when: docker_binary.stat.exists == False
+
+- name: Add default user to the docker group
+  user:
+    name: "{{ user_name }}"
+    groups: docker
