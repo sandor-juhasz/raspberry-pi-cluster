@@ -6,10 +6,6 @@
       prompt: "Name of the default user"
     - name: "user_password"
       prompt: "Password of the default user"
-    - name: "noip_username"
-      prompt: "Noip username"
-    - name: "noip_password"
-      prompt: "Noip password"
   roles:
     - raspbian
     - tools
@@ -18,6 +14,11 @@
     - docker
 - hosts: pi1
   become: true
+  vars_prompt:
+    - name: "noip_username"
+      prompt: "Noip username"
+    - name: "noip_password"
+      prompt: "Noip password"
   roles:
     - nfs-server
     - graphite-server
