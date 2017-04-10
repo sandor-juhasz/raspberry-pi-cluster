@@ -25,6 +25,10 @@
     - noip
     - fail2ban
     - jenkins
+- hosts: pi4
+  become: true
+  roles:
+    - elk
 - hosts: pi2,pi3,pi4
   become: true
   roles:

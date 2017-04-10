@@ -1,0 +1,216 @@
+#
+# Installs the most recent ELK stack on a single node for log monitoring.
+#
+
+#
+# Installs the most recent Oracle JDK 8
+#
+
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+  
+- name: install Oracle JDK 8
+  apt: name={{item}} state=installed
+  with_items:
+    - oracle-java8-jdk
+    
+- name: make the Oracle JDK 8 the default JDK.
+  alternatives:
+    name: java
+    path: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/jre/bin/java
+
+#
+# Installs Elasticsearch 5.3.0 package
+#
+# TODO: make the elasticsearch version number a variable.
+# TODO: make the memory allocation limit a variable.
+
+
+- name: install official deb package from Elasticsearch site
+  apt:
+    deb: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.3.0.deb
+
+- name: Setting initial memory allocation for Elasticsearch JVM
+  lineinfile:
+    dest: /etc/elasticsearch/jvm.options
+    regexp: '^-Xms'
+    line: '-Xms128m'
+
+- name: Setting maximum memory allocation for Elasticsearch JVM
+  lineinfile:
+    dest: /etc/elasticsearch/jvm.options
+    regexp: '^-Xmx'
+    line: '-Xmx128m'
+
+- name: Enable the Elasticsearch service in Systemd
+  systemd:
+    daemon_reload: yes
+    name: elasticsearch.service
+    enabled: yes
+    state: started
+#
+# Installs Kibana
+#
+# TODO: make the version number a variable.
+# TODO: Ability to specify other installation directories.
+# TODO: Add SHA1 check for downloaded artifacts.
+# TODO: Use the host IP address instead of the hardcoded 192.168.1.14
+#
+
+#
+# Completely insecure way to add the remote repository.
+# Use this method for development purposes only!
+#
+- name: Add node.js official repos
+  shell: curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+  
+- name: Install latest Node.JS
+  apt: name={{item}} state=installed
+  with_items:
+    - nodejs
+
+- name: Create kibana user
+  user:
+    name: kibana
+    createhome: no
+    state: present
+
+- name: Lock the kibana user.
+  shell: usermod -L kibana
+
+- name: Check kibana installation
+  stat: path=/opt/apps/kibana-5.3.0-linux-x86_64
+  register: kibana_dir
+
+- name: Download the Kibana distribution
+  get_url:
+    url: https://artifacts.elastic.co/downloads/kibana/kibana-5.3.0-linux-x86_64.tar.gz
+    dest: /tmp
+  when: kibana_dir.stat.exists == False
+
+- name: Extract the Kibana distribution
+  unarchive:
+    src: /tmp/kibana-5.3.0-linux-x86_64.tar.gz
+    dest: /opt/apps
+    owner: kibana
+    group: kibana
+  when: kibana_dir.stat.exists == False
+
+- name: Create kibana symlink.
+  file:
+    src: /opt/apps/kibana-5.3.0-linux-x86_64
+    dest: /opt/apps/kibana
+    owner: kibana
+    group: kibana
+    mode: 0755
+    state: link
+  
+- name: Check if the Kibana distribution uses the original x86 node executable
+  stat: path=/opt/apps/kibana/node/bin/node
+  register: node_executable
+
+- name: Move original node executable to node_x86
+  command: mv /opt/apps/kibana/node/bin/node /opt/apps/kibana/node/bin/node_x86
+  when: node_executable.stat.isreg == True
+
+- name: Link to Arm node binary
+  file:
+    src: /usr/bin/node
+    dest: /opt/apps/kibana/node/bin/node
+    owner: kibana
+    group: kibana
+    mode: 0755
+    state: link
+  when: node_executable.stat.isreg == True
+
+- name: Check if the Kibana distribution uses the original x86 npm executable
+  stat: path=/opt/apps/kibana/node/bin/npm
+  register: npm_executable
+
+- name: Move original npm executable to npm_x86
+  command: mv /opt/apps/kibana/node/bin/npm /opt/apps/kibana/node/bin/npm_x86
+  when: npm_executable.stat.isreg == True
+
+- name: Link to Arm node binary
+  file:
+    src: /usr/bin/npm
+    dest: /opt/apps/kibana/node/bin/npm
+    owner: kibana
+    group: kibana
+    mode: 0755
+    state: link
+  when: npm_executable.stat.isreg == True
+
+- name: Make Kibana available from external network interfaces
+  lineinfile:
+    dest: /opt/apps/kibana/config/kibana.yml
+    regexp: '^server.host:'
+    line: 'server.host: "192.168.1.14"'  
+
+- name: Install Kibana init script
+  copy:
+    src: kibana5
+    dest: /etc/init.d/kibana5
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Enable Kibana service
+  systemd:
+    daemon_reload: yes
+    name: kibana5.service
+    enabled: yes
+    state: started
+
+#
+# Install Logstash
+#
+- name: install official Logstash deb package from Elasticsearch site
+  apt:
+    deb: https://artifacts.elastic.co/downloads/logstash/logstash-5.3.0.deb
+
+- name: Installing libjffi-1.2.so, see https://github.com/jruby/jruby/issues/1561#issuecomment-67953147
+  copy:
+    src: libjffi-1.2.so
+    dest: /usr/share/logstash/vendor/jruby/lib/jni/arm-Linux/libjffi-1.2.so
+    owner: logstash
+    group: logstash
+    mode: 0755
+
+- name: Installing libjffi-1.2.so-enabled jRuby, see previous Jira ticket.
+  copy:
+    src: jruby.jar
+    dest: /usr/share/logstash/vendor/jruby/lib/jruby.jar
+    owner: logstash
+    group: logstash
+    mode: 0644
+
+- name: Setting initial memory allocation for Logstash JVM
+  lineinfile:
+    dest: /etc/logstash/jvm.options
+    regexp: '^-Xms'
+    line: '-Xms64m'
+
+- name: Setting maximum memory allocation for Logstash JVM
+  lineinfile:
+    dest: /etc/logstash/jvm.options
+    regexp: '^-Xmx'
+    line: '-Xmx64m'
+
+- name: Installing configuration file for default pipeline
+  copy:
+    src: gelf_to_elastic.conf
+    dest: /etc/logstash/conf.d/gelf_to_elastic.conf
+    owner: root
+    group: root
+    mode: 0644
+  
+- name: Enable Logstash service
+  systemd:
+    daemon_reload: yes
+    name: logstash.service
+    enabled: yes
+    state: started
