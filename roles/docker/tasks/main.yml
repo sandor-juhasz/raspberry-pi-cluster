@@ -10,3 +10,11 @@
   user:
     name: "{{ user_name }}"
     groups: docker
+
+- name: Check if docker-compose is installed
+  stat: path=/usr/local/bin/docker-compose
+  register: docker_compose_binary
+
+- name: install docker-compose
+  shell: pip install docker-compose
+  when: docker_compose_binary.stat.exists == False
