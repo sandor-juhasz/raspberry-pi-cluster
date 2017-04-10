@@ -24,6 +24,7 @@
     - graphite-server
     - noip
     - fail2ban
+    - jenkins
 - hosts: pi2,pi3,pi4
   become: true
   roles:

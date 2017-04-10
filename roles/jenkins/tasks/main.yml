@@ -1,0 +1,65 @@
+#
+# Installs the most recent version of Jenkins from the official Jenkins repo.
+#
+# The playbook was created using the article at:
+# http://kubecloud.io/guide-install-jenkins-on-rpi/
+#
+
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+  
+- name: install Oracle JDK 8
+  apt: name={{item}} state=installed
+  with_items:
+    - oracle-java8-jdk
+    
+- name: make the Oracle JDK 8 the default JDK.
+  alternatives:
+    name: java
+    path: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/jre/bin/java
+
+- name: Add Jenkins key to apt
+  apt_key:
+    url: 'https://pkg.jenkins.io/debian-stable/jenkins.io.key'
+    state: present
+
+- name: Add official Jenkins repo
+  apt_repository:
+    repo: deb http://pkg.jenkins-ci.org/debian binary/
+    state: present
+    filename: 'jenkins'
+
+- name: Update APT Cache
+  apt: update-cache=yes cache_valid_time=3600
+  
+- name: install Jenkins
+  apt: name={{item}} state=installed
+  with_items:
+    - jenkins
+
+- name: Update Jenkins port
+  lineinfile:
+    dest: /etc/init.d/jenkins
+    regexp: '^HTTP_PORT='
+    line: 'HTTP_PORT=2001'
+
+- name: Add jenkins user to the docker group.
+  user:
+    name: 'jenkins'
+    groups: docker
+
+- name: Reload systemd
+  shell: systemctl daemon-reload
+  
+#
+# Use systemd reload after 2.4 and above!
+#- name: Reload systemd
+#  systemd: daemon_reload=yes
+#
+
+- name: Restart jenkins server
+  service:
+    name: jenkins
+    enabled: yes
+    state: restarted
+  
