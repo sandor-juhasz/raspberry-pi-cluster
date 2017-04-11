@@ -43,6 +43,12 @@
     regexp: '^HTTP_PORT='
     line: 'HTTP_PORT=2001'
 
+- name: Update Jenkins prefix for reverse proxying.
+  lineinfile:
+    dest: /etc/init.d/jenkins
+    regexp: '^JENKINS_ARGS='
+    line: 'JENKINS_ARGS="--httpPort=$HTTP_PORT --prefix=/jenkins"'
+
 - name: Add jenkins user to the docker group.
   user:
     name: 'jenkins'
