@@ -150,6 +150,26 @@
     regexp: '^server.host:'
     line: 'server.host: "192.168.1.14"'  
 
+- name: Create Kibana log directory
+  file:
+    path: /var/log/kibana
+    owner: kibana
+    group: kibana
+    mode: 0755
+    state: directory
+
+- name: Update Kibana config to use new log directory.
+  lineinfile:
+    dest: /opt/apps/kibana/config/kibana.yml
+    regexp: 'logging.dest:'
+    line: 'logging.dest: /var/log/kibana/kibana.log'
+
+- name: Update Kibana config to use /kibana prefix.
+  lineinfile:
+    dest: /opt/apps/kibana/config/kibana.yml
+    regexp: 'server.basePath:'
+    line: 'server.basepath: "/kibana"'
+
 - name: Install Kibana init script
   copy:
     src: kibana5
